@@ -46,6 +46,11 @@ func isNumeric(character rune) bool {
 	return false
 }
 
+// Any character which is either ALPHABETIC or NUMERIC
+func isAlphanumeric(character rune) bool {
+	return isAlphabetic(character) || isNumeric(character)
+}
+
 // type tokenizer struct{}
 //
 // func (t *tokenizer)  {

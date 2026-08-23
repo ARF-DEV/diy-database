@@ -25,7 +25,7 @@ func TestIsAlphabetic(t *testing.T) {
 		assert.Equal(t, true, isAlphabetic('A'))
 		assert.Equal(t, true, isAlphabetic('a'))
 		assert.Equal(t, true, isAlphabetic('_'))
-		assert.Equal(t, true, isAlphabetic('_'))
+		assert.Equal(t, true, isAlphabetic('ë'))
 	})
 	t.Run("Not an alphabet", func(t *testing.T) {
 		assert.Equal(t, false, isAlphabetic('{'))
@@ -40,4 +40,19 @@ func TestIsNumeric(t *testing.T) {
 	t.Run("Not a numeric", func(t *testing.T) {
 		assert.Equal(t, false, isNumeric('A'))
 	})
+}
+
+func TestIsAlphanumeric(t *testing.T) {
+	t.Run("Is an alphanumeric", func(t *testing.T) {
+		assert.Equal(t, true, isAlphabetic('A'))
+		assert.Equal(t, true, isAlphabetic('a'))
+		assert.Equal(t, true, isAlphabetic('_'))
+		assert.Equal(t, true, isAlphabetic('ë'))
+		assert.Equal(t, true, isNumeric('2'))
+	})
+	t.Run("Not an alphanumeric", func(t *testing.T) {
+		assert.Equal(t, false, isAlphabetic('{'))
+		assert.Equal(t, false, isNumeric('A'))
+	})
+
 }
