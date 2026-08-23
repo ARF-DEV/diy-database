@@ -1,6 +1,7 @@
 package tokenizer
 
 // Tokenizer follows Requirements For The SQLite Tokenizer
+// ref: https://sqlite.org/draft/tokenreq.html
 
 type charClass byte
 
