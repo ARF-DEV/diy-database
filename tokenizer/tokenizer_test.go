@@ -44,15 +44,30 @@ func TestIsNumeric(t *testing.T) {
 
 func TestIsAlphanumeric(t *testing.T) {
 	t.Run("Is an alphanumeric", func(t *testing.T) {
-		assert.Equal(t, true, isAlphabetic('A'))
-		assert.Equal(t, true, isAlphabetic('a'))
-		assert.Equal(t, true, isAlphabetic('_'))
-		assert.Equal(t, true, isAlphabetic('ë'))
-		assert.Equal(t, true, isNumeric('2'))
+		assert.Equal(t, true, isAlphanumeric('A'))
+		assert.Equal(t, true, isAlphanumeric('a'))
+		assert.Equal(t, true, isAlphanumeric('_'))
+		assert.Equal(t, true, isAlphanumeric('ë'))
+		assert.Equal(t, true, isAlphanumeric('2'))
 	})
 	t.Run("Not an alphanumeric", func(t *testing.T) {
-		assert.Equal(t, false, isAlphabetic('{'))
-		assert.Equal(t, false, isNumeric('A'))
+		assert.Equal(t, false, isAlphanumeric('{'))
+	})
+}
+
+func TestIsHexadecimal(t *testing.T) {
+	t.Run("Is a Hexadecimal", func(t *testing.T) {
+		assert.Equal(t, true, isHexadecimal('F'))
+		assert.Equal(t, true, isHexadecimal('b'))
+		assert.Equal(t, true, isHexadecimal('2'))
+	})
+}
+func TestIsSpecial(t *testing.T) {
+	t.Run("Is a Special", func(t *testing.T) {
+		assert.Equal(t, true, isSpecial('&'))
 	})
 
+	t.Run("Not a Special", func(t *testing.T) {
+		assert.Equal(t, false, isSpecial('C'))
+	})
 }

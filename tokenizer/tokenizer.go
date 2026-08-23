@@ -51,6 +51,23 @@ func isAlphanumeric(character rune) bool {
 	return isAlphabetic(character) || isNumeric(character)
 }
 
+// Any NUMERIC character
+// or a characters in the range u0041 through u0046 ("A" through "F")
+// or in the range u0061 through u0066 ("a" through "f")
+func isHexadecimal(character rune) bool {
+	if character >= 'A' && character <= 'F' ||
+		character >= 'a' && character <= 'f' ||
+		isNumeric(character) {
+		return true
+	}
+	return false
+}
+
+// Any character that is not WHITESPACE, ALPHABETIC, nor NUMERIC
+func isSpecial(character rune) bool {
+	return !isWhiteSpace(character) && !isAlphanumeric(character)
+}
+
 // type tokenizer struct{}
 //
 // func (t *tokenizer)  {
