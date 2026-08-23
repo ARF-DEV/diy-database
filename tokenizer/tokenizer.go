@@ -38,6 +38,14 @@ func isAlphabetic(character rune) bool {
 	return false
 }
 
+// Any of the characters in the range u0030 through u0039 (digits "0" through "9")
+func isNumeric(character rune) bool {
+	if character >= '0' && character <= '9' {
+		return true
+	}
+	return false
+}
+
 // type tokenizer struct{}
 //
 // func (t *tokenizer)  {
