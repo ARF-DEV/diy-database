@@ -5,9 +5,10 @@ import (
 )
 
 type tokenizer struct {
-	currentIdx int
-	target     []rune
-	lastToken  TokenLiteral
+	currentIdx  int
+	target      []rune
+	lastToken   TokenLiteral
+	lastTokenV2 Token
 }
 
 func NewTokenizer(target []rune) tokenizer {
@@ -52,6 +53,42 @@ func (t *tokenizer) Scan() (scannedToken TokenLiteral) {
 		scannedToken = TokenLiteral(";")
 	}
 	return
+}
+
+func (t *tokenizer) ScanV2() (scannedToken Token) {
+	defer func() {
+		t.lastTokenV2 = scannedToken
+	}()
+
+	for t.canContinue() {
+		if t.currentIsWhiteSpace() {
+			return t.processWhiteSpaceToken()
+		}
+		// TODO: other tokens detection
+	}
+
+	return
+}
+
+func (t *tokenizer) currentIsWhiteSpace() bool {
+	curRune := t.GetRune()
+	if isWhiteSpace(curRune) {
+		return true
+	}
+
+	if curRune == '-' && (t.canPeek() && t.peekRune() == '-') {
+		return true
+	}
+
+	return false
+}
+
+func (t *tokenizer) canPeek() bool {
+	return t.currentIdx+1 < len(t.target)
+}
+
+func (t *tokenizer) peekRune() rune {
+	return t.target[t.currentIdx+1]
 }
 
 func (t *tokenizer) Next() bool {
