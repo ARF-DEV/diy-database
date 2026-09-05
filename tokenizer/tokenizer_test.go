@@ -6,68 +6,51 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestIsWhiteSpace(t *testing.T) {
-	t.Run("Is a whitespace", func(t *testing.T) {
-		assert.Equal(t, true, isWhiteSpace(' '))
-		assert.Equal(t, true, isWhiteSpace(0x0020))
-		assert.Equal(t, true, isWhiteSpace(0x0009))
-		assert.Equal(t, true, isWhiteSpace(0x000a))
-		assert.Equal(t, true, isWhiteSpace(0x000c))
-		assert.Equal(t, true, isWhiteSpace(0x000d))
-	})
-	t.Run("Not a whitespace", func(t *testing.T) {
-		assert.Equal(t, false, isWhiteSpace('A'))
-	})
-}
+func TestTokenizer(t *testing.T) {
+	t.Run("tokenizer shall process from left to right", func(t *testing.T) {
+		tknizer := NewTokenizer([]rune("hello world"))
+		processedString := ""
+		for tknizer.canContinue() {
+			processedString += string(tknizer.GetRune())
+			tknizer.NextChar()
+		}
 
-func TestIsAlphabetic(t *testing.T) {
-	t.Run("Is an alphabet", func(t *testing.T) {
-		assert.Equal(t, true, isAlphabetic('A'))
-		assert.Equal(t, true, isAlphabetic('a'))
-		assert.Equal(t, true, isAlphabetic('_'))
-		assert.Equal(t, true, isAlphabetic('ë'))
-	})
-	t.Run("Not an alphabet", func(t *testing.T) {
-		assert.Equal(t, false, isAlphabetic('{'))
-	})
-}
-
-func TestIsNumeric(t *testing.T) {
-	t.Run("Is a numeric", func(t *testing.T) {
-		assert.Equal(t, true, isNumeric('2'))
+		assert.Equal(t, "hello world", processedString)
 	})
 
-	t.Run("Not a numeric", func(t *testing.T) {
-		assert.Equal(t, false, isNumeric('A'))
-	})
-}
+	t.Run("whitespace token only acts as seperator between tokens", func(t *testing.T) {
+		tokenizer := NewTokenizer([]rune("Hello world"))
 
-func TestIsAlphanumeric(t *testing.T) {
-	t.Run("Is an alphanumeric", func(t *testing.T) {
-		assert.Equal(t, true, isAlphanumeric('A'))
-		assert.Equal(t, true, isAlphanumeric('a'))
-		assert.Equal(t, true, isAlphanumeric('_'))
-		assert.Equal(t, true, isAlphanumeric('ë'))
-		assert.Equal(t, true, isAlphanumeric('2'))
-	})
-	t.Run("Not an alphanumeric", func(t *testing.T) {
-		assert.Equal(t, false, isAlphanumeric('{'))
-	})
-}
+		expected := []token{[]rune("Hello"), []rune("world")}
+		tokens := []token{}
 
-func TestIsHexadecimal(t *testing.T) {
-	t.Run("Is a Hexadecimal", func(t *testing.T) {
-		assert.Equal(t, true, isHexadecimal('F'))
-		assert.Equal(t, true, isHexadecimal('b'))
-		assert.Equal(t, true, isHexadecimal('2'))
-	})
-}
-func TestIsSpecial(t *testing.T) {
-	t.Run("Is a Special", func(t *testing.T) {
-		assert.Equal(t, true, isSpecial('&'))
+		for {
+			if !tokenizer.canContinue() {
+				break
+			}
+
+			token := tokenizer.Next()
+			tokens = append(tokens, token)
+		}
+
+		assert.EqualValues(t, expected, tokens)
 	})
 
-	t.Run("Not a Special", func(t *testing.T) {
-		assert.Equal(t, false, isSpecial('C'))
+	t.Run("whitespace token only acts as seperator between tokens -> multiple whitespace", func(t *testing.T) {
+		tokenizer := NewTokenizer([]rune("Hello      world    "))
+
+		expected := []token{[]rune("Hello"), []rune("world")}
+		tokens := []token{}
+
+		for {
+			if !tokenizer.canContinue() {
+				break
+			}
+
+			token := tokenizer.Next()
+			tokens = append(tokens, token)
+		}
+
+		assert.EqualValues(t, expected, tokens)
 	})
 }
