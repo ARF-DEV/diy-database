@@ -21,8 +21,8 @@ func TestTokenizer(t *testing.T) {
 	t.Run("whitespace token only acts as seperator between tokens", func(t *testing.T) {
 		tokenizer := NewTokenizer([]rune("Hello world"))
 
-		expected := []token{[]rune("Hello"), []rune("world"), []rune(";")}
-		tokens := []token{}
+		expected := []TokenLiteral{[]rune("Hello"), []rune("world"), []rune(";")}
+		tokens := []TokenLiteral{}
 
 		for tokenizer.Next() {
 			token := tokenizer.Scan()
@@ -35,8 +35,8 @@ func TestTokenizer(t *testing.T) {
 	t.Run("whitespace token only acts as seperator between tokens -> multiple whitespace", func(t *testing.T) {
 		tokenizer := NewTokenizer([]rune("Hello      world    "))
 
-		expected := []token{[]rune("Hello"), []rune("world"), []rune(";")}
-		tokens := []token{}
+		expected := []TokenLiteral{[]rune("Hello"), []rune("world"), []rune(";")}
+		tokens := []TokenLiteral{}
 
 		for tokenizer.Next() {
 			token := tokenizer.Scan()
@@ -50,8 +50,8 @@ func TestTokenizer(t *testing.T) {
 		input := []rune("SELECT * FROM users")
 		tokenizer := NewTokenizer(input)
 
-		expected := []token{[]rune("SELECT"), []rune("*"), []rune("FROM"), []rune("users"), []rune(";")}
-		tokens := []token{}
+		expected := []TokenLiteral{[]rune("SELECT"), []rune("*"), []rune("FROM"), []rune("users"), []rune(";")}
+		tokens := []TokenLiteral{}
 
 		for tokenizer.Next() {
 			token := tokenizer.Scan()
@@ -65,8 +65,8 @@ func TestTokenizer(t *testing.T) {
 		input := []rune("SELECT * FROM users;")
 		tokenizer := NewTokenizer(input)
 
-		expected := []token{[]rune("SELECT"), []rune("*"), []rune("FROM"), []rune("users"), []rune(";")}
-		tokens := []token{}
+		expected := []TokenLiteral{[]rune("SELECT"), []rune("*"), []rune("FROM"), []rune("users"), []rune(";")}
+		tokens := []TokenLiteral{}
 
 		for tokenizer.Next() {
 			token := tokenizer.Scan()

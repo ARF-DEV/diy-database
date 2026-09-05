@@ -4,16 +4,10 @@ import (
 	"strings"
 )
 
-type token []rune
-
-func (t token) String() string {
-	return string(t)
-}
-
 type tokenizer struct {
 	currentIdx int
 	target     []rune
-	lastToken  token
+	lastToken  TokenLiteral
 }
 
 func NewTokenizer(target []rune) tokenizer {
@@ -30,7 +24,7 @@ func (t *tokenizer) GetRune() rune {
 	return t.target[t.currentIdx]
 }
 
-func (t *tokenizer) Scan() (scannedToken token) {
+func (t *tokenizer) Scan() (scannedToken TokenLiteral) {
 	defer func() {
 		t.lastToken = scannedToken
 	}()
@@ -52,10 +46,10 @@ func (t *tokenizer) Scan() (scannedToken token) {
 		t.NextChar()
 	}
 
-	scannedToken = token(builder.String())
+	scannedToken = TokenLiteral(builder.String())
 	// todo: do a proper token type detection
 	if string(scannedToken) == "" {
-		scannedToken = token(";")
+		scannedToken = TokenLiteral(";")
 	}
 	return
 }
