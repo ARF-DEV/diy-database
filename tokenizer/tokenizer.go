@@ -6,9 +6,14 @@ import (
 
 type token []rune
 
+func (t token) String() string {
+	return string(t)
+}
+
 type tokenizer struct {
 	currentIdx int
 	target     []rune
+	lastToken  token
 }
 
 func NewTokenizer(target []rune) tokenizer {
@@ -25,20 +30,40 @@ func (t *tokenizer) GetRune() rune {
 	return t.target[t.currentIdx]
 }
 
-func (t *tokenizer) Next() token {
+func (t *tokenizer) Scan() (scannedToken token) {
+	defer func() {
+		t.lastToken = scannedToken
+	}()
+
 	t.ignoreWhitespace()
 
 	builder := strings.Builder{}
 	for t.canContinue() {
-		if isWhiteSpace(t.GetRune()) {
+		if isWhiteSpace(t.GetRune()) ||
+			// a convenient way to break a token that is joint together with semicolon,
+			// as of the current implementation i haven't implement a proper way to detect token adn token types
+			// so this will be refactored in the future when i implement a proper type detection code
+			(len(builder.String()) > 0 && isSemicolon(t.GetRune())) {
 			break
 		}
+
 		builder.WriteRune(t.GetRune())
 
 		t.NextChar()
 	}
 
-	return token(builder.String())
+	scannedToken = token(builder.String())
+	// todo: do a proper token type detection
+	if string(scannedToken) == "" {
+		scannedToken = token(";")
+	}
+	return
+}
+
+func (t *tokenizer) Next() bool {
+	t.ignoreWhitespace()
+	// todo: do a proper token type detection
+	return string(t.lastToken) != string([]rune(";"))
 }
 
 func (t *tokenizer) canContinue() bool {

@@ -1,3 +1,4 @@
+// Package tokenizer
 package tokenizer
 
 type TokenType string

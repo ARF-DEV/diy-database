@@ -68,3 +68,7 @@ func isHexadecimal(character rune) bool {
 func isSpecial(character rune) bool {
 	return !isWhiteSpace(character) && !isAlphanumeric(character)
 }
+
+func isSemicolon(character rune) bool {
+	return character == ';'
+}

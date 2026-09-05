@@ -21,36 +21,58 @@ func TestTokenizer(t *testing.T) {
 	t.Run("whitespace token only acts as seperator between tokens", func(t *testing.T) {
 		tokenizer := NewTokenizer([]rune("Hello world"))
 
-		expected := []token{[]rune("Hello"), []rune("world")}
+		expected := []token{[]rune("Hello"), []rune("world"), []rune(";")}
 		tokens := []token{}
 
-		for {
-			if !tokenizer.canContinue() {
-				break
-			}
-
-			token := tokenizer.Next()
+		for tokenizer.Next() {
+			token := tokenizer.Scan()
 			tokens = append(tokens, token)
 		}
 
-		assert.EqualValues(t, expected, tokens)
+		assert.EqualValues(t, expected, tokens, "expected: %v, but got: %v", expected, tokens)
 	})
 
 	t.Run("whitespace token only acts as seperator between tokens -> multiple whitespace", func(t *testing.T) {
 		tokenizer := NewTokenizer([]rune("Hello      world    "))
 
-		expected := []token{[]rune("Hello"), []rune("world")}
+		expected := []token{[]rune("Hello"), []rune("world"), []rune(";")}
 		tokens := []token{}
 
-		for {
-			if !tokenizer.canContinue() {
-				break
-			}
-
-			token := tokenizer.Next()
+		for tokenizer.Next() {
+			token := tokenizer.Scan()
 			tokens = append(tokens, token)
 		}
 
-		assert.EqualValues(t, expected, tokens)
+		assert.EqualValues(t, expected, tokens, "expected: %v, but got: %v", expected, tokens)
+	})
+
+	t.Run("tokenizer return semicolon at the end of an input when the input has no semicolon as its last character", func(t *testing.T) {
+		input := []rune("SELECT * FROM users")
+		tokenizer := NewTokenizer(input)
+
+		expected := []token{[]rune("SELECT"), []rune("*"), []rune("FROM"), []rune("users"), []rune(";")}
+		tokens := []token{}
+
+		for tokenizer.Next() {
+			token := tokenizer.Scan()
+			tokens = append(tokens, token)
+		}
+
+		assert.EqualValues(t, expected, tokens, "expected: %v, but got: %v", expected, tokens)
+	})
+
+	t.Run("tokenizer didn't return semicolon at the end of an input when the input has no semicolon as its last character", func(t *testing.T) {
+		input := []rune("SELECT * FROM users;")
+		tokenizer := NewTokenizer(input)
+
+		expected := []token{[]rune("SELECT"), []rune("*"), []rune("FROM"), []rune("users"), []rune(";")}
+		tokens := []token{}
+
+		for tokenizer.Next() {
+			token := tokenizer.Scan()
+			tokens = append(tokens, token)
+		}
+
+		assert.EqualValues(t, expected, tokens, "expected: %v, but got: %v", expected, tokens)
 	})
 }
