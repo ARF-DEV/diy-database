@@ -56,31 +56,45 @@ func (t *tokenizer) Scan() (scannedToken TokenLiteral) {
 }
 
 func (t *tokenizer) ScanV2() (scannedToken Token) {
-	defer func() {
-		t.lastTokenV2 = scannedToken
-	}()
+	var err error
+	t.ignoreWhitespaceCharacters()
 
 	for t.canContinue() {
-		if t.currentIsWhiteSpace() {
-			return t.processWhiteSpaceToken()
-		}
 		// TODO: other tokens detection
+		if isAlphabetic(t.GetRune()) {
+			// possibility:
+			// ident
+			// keyword
+			scannedToken, err = t.processTokenWithAlphabetStart()
+			if err != nil {
+				panic(err)
+			}
+			break
+		}
+
+		if isSpecial(t.GetRune()) {
+			// possibility:
+			// operator
+			// variable
+			scannedToken, err = t.processTokenWithSpecialStart()
+			if err != nil {
+				panic(err)
+			}
+			break
+		}
+
+		// skipp, there is still some syntax that isn't implemented yet
+		t.NextChar()
 	}
 
+	if !t.canContinue() && scannedToken.Type == "" {
+		scannedToken = Token{
+			Type:    SEMI,
+			Literal: TokenLiteral(";"),
+		}
+	}
+	t.lastTokenV2 = scannedToken
 	return
-}
-
-func (t *tokenizer) currentIsWhiteSpace() bool {
-	curRune := t.GetRune()
-	if isWhiteSpace(curRune) {
-		return true
-	}
-
-	if curRune == '-' && (t.canPeek() && t.peekRune() == '-') {
-		return true
-	}
-
-	return false
 }
 
 func (t *tokenizer) canPeek() bool {
@@ -95,6 +109,10 @@ func (t *tokenizer) Next() bool {
 	t.ignoreWhitespace()
 	// todo: do a proper token type detection
 	return string(t.lastToken) != string([]rune(";"))
+}
+
+func (t *tokenizer) NextV2() bool {
+	return t.lastTokenV2.Type != SEMI
 }
 
 func (t *tokenizer) canContinue() bool {

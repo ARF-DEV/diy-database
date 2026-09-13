@@ -16,10 +16,21 @@ type Token struct {
 }
 
 const (
-	Whitespace TokenType = "Whitespace"
-	Ident      TokenType = "Identifier"
-	Lit        TokenType = "Literal"
-	Var        TokenType = "Variable"
-	Op         TokenType = "Operator"
-	Keyword    TokenType = "Keyword"
+	IDENT TokenType = "IDENT"
+	LIT   TokenType = "LIT"
+	VAR   TokenType = "VAR"
+
+	// Keyword
+	SELECT TokenType = "KEYWORD_SELECT"
+	FROM   TokenType = "KEYWORD_FROM"
+
+	// Operator
+	STAR TokenType = "OPERATOR_STAR" // "*"
+	SEMI TokenType = "OPERATOR_SEMI" // ";"
 )
+
+// supported keywords
+var keywordMap map[string]TokenType = map[string]TokenType{
+	"SELECT": SELECT,
+	"FROM":   FROM,
+}

@@ -1,27 +1,33 @@
 package tokenizer
 
-func (t *tokenizer) processWhiteSpaceToken() (token Token) {
-	token.Type = Whitespace
+import (
+	"errors"
+	"strings"
+)
+
+var ErrInvalidToken = errors.New("invalid token")
+
+// Possible combination with variable token
+func (t *tokenizer) ignoreWhitespaceCharacters() {
 	// look at the prefix to get an idea what type of white space is this
 	// H41100: sequence of one or more WHITESPACE character
 	// H41110: comment with -- beginning
 	// 441120: comment with /* */
+	if !t.canContinue() {
+		return
+	}
 
 	// H41100: sequence of one or more WHITESPACE character
 	if isWhiteSpace(t.GetRune()) {
 		for t.canContinue() && isWhiteSpace(t.GetRune()) {
-			token.Literal = append(token.Literal, t.GetRune())
 			t.NextChar()
 		}
-
-		return token
+		return
 	}
 
 	// H41110: comment with -- beginning
 	if t.GetRune() == '-' && (t.canPeek() && t.peekRune() == '-') {
-		token.Literal = append(token.Literal, t.GetRune())
 		t.NextChar()
-		token.Literal = append(token.Literal, t.GetRune())
 		t.NextChar()
 
 		for t.canContinue() {
@@ -30,18 +36,15 @@ func (t *tokenizer) processWhiteSpaceToken() (token Token) {
 				break
 			}
 
-			token.Literal = append(token.Literal, r)
 			t.NextChar()
 		}
 
-		return token
+		return
 	}
 
 	// 441120: comment with /* */
 	if t.GetRune() == '/' && (t.canPeek() && t.peekRune() == '*') {
-		token.Literal = append(token.Literal, t.GetRune())
 		t.NextChar()
-		token.Literal = append(token.Literal, t.GetRune())
 		t.NextChar()
 
 		for t.canContinue() {
@@ -49,12 +52,64 @@ func (t *tokenizer) processWhiteSpaceToken() (token Token) {
 			if r == '*' && (t.canPeek() && t.peekRune() == '/') {
 				break
 			}
-			token.Literal = append(token.Literal, r)
 			t.NextChar()
 		}
 
-		return token
+		return
+	}
+}
+
+func (t *tokenizer) processTokenWithAlphabetStart() (Token, error) {
+	result := Token{}
+
+	i := 0
+	builder := strings.Builder{}
+	for t.canContinue() && !isWhiteSpace(t.GetRune()) {
+		if i == 0 {
+			if !isAlphabetic(t.GetRune()) {
+				// first character need to be alphabetic
+				return Token{}, ErrInvalidToken
+			}
+
+			builder.WriteRune(t.GetRune())
+			i++
+			t.NextChar()
+			continue
+		} else {
+			if !isAlphanumeric(t.GetRune()) {
+				break
+			}
+
+			builder.WriteRune(t.GetRune())
+			i++
+			t.NextChar()
+			continue
+		}
 	}
 
-	return
+	result.Type = IDENT
+	result.Literal = TokenLiteral(builder.String())
+
+	tokenType, isKeyword := keywordMap[string(result.Literal)]
+	if isKeyword {
+		result.Type = tokenType
+	}
+	return result, nil
+}
+
+// TBD: maybe better to use map, instead of pure logic branches
+func (t *tokenizer) processTokenWithSpecialStart() (Token, error) {
+	builder := strings.Builder{}
+	switch t.GetRune() {
+	case '*':
+		builder.WriteRune(t.GetRune())
+		t.NextChar()
+		return Token{STAR, TokenLiteral(builder.String())}, nil
+	case ';':
+		builder.WriteRune(t.GetRune())
+		t.NextChar()
+		return Token{SEMI, TokenLiteral(builder.String())}, nil
+		// TODO: other operator token
+	}
+	return Token{}, ErrInvalidToken
 }

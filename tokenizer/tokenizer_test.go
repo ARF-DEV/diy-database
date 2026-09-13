@@ -17,15 +17,28 @@ func TestTokenizer(t *testing.T) {
 
 		assert.Equal(t, "hello world", processedString)
 	})
-
+	//
 	t.Run("whitespace token only acts as seperator between tokens", func(t *testing.T) {
 		tokenizer := NewTokenizer([]rune("Hello world"))
 
-		expected := []TokenLiteral{[]rune("Hello"), []rune("world"), []rune(";")}
-		tokens := []TokenLiteral{}
+		expected := []Token{
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("Hello"),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("world"),
+			},
+			{
+				Type:    SEMI,
+				Literal: TokenLiteral(";"),
+			},
+		}
+		tokens := []Token{}
 
-		for tokenizer.Next() {
-			token := tokenizer.Scan()
+		for tokenizer.NextV2() {
+			token := tokenizer.ScanV2()
 			tokens = append(tokens, token)
 		}
 
@@ -34,12 +47,24 @@ func TestTokenizer(t *testing.T) {
 
 	t.Run("whitespace token only acts as seperator between tokens -> multiple whitespace", func(t *testing.T) {
 		tokenizer := NewTokenizer([]rune("Hello      world    "))
+		expected := []Token{
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("Hello"),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("world"),
+			},
+			{
+				Type:    SEMI,
+				Literal: TokenLiteral(";"),
+			},
+		}
+		tokens := []Token{}
 
-		expected := []TokenLiteral{[]rune("Hello"), []rune("world"), []rune(";")}
-		tokens := []TokenLiteral{}
-
-		for tokenizer.Next() {
-			token := tokenizer.Scan()
+		for tokenizer.NextV2() {
+			token := tokenizer.ScanV2()
 			tokens = append(tokens, token)
 		}
 
@@ -50,11 +75,32 @@ func TestTokenizer(t *testing.T) {
 		input := []rune("SELECT * FROM users")
 		tokenizer := NewTokenizer(input)
 
-		expected := []TokenLiteral{[]rune("SELECT"), []rune("*"), []rune("FROM"), []rune("users"), []rune(";")}
-		tokens := []TokenLiteral{}
+		expected := []Token{
+			{
+				Type:    SELECT,
+				Literal: TokenLiteral("SELECT"),
+			},
+			{
+				Type:    STAR,
+				Literal: TokenLiteral("*"),
+			},
+			{
+				Type:    FROM,
+				Literal: TokenLiteral("FROM"),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("users"),
+			},
+			{
+				Type:    SEMI,
+				Literal: TokenLiteral(";"),
+			},
+		}
+		tokens := []Token{}
 
-		for tokenizer.Next() {
-			token := tokenizer.Scan()
+		for tokenizer.NextV2() {
+			token := tokenizer.ScanV2()
 			tokens = append(tokens, token)
 		}
 
