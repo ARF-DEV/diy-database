@@ -5,10 +5,9 @@ import (
 )
 
 type tokenizer struct {
-	currentIdx  int
-	target      []rune
-	lastToken   TokenLiteral
-	lastTokenV2 Token
+	currentIdx int
+	target     []rune
+	lastToken  Token
 }
 
 func NewTokenizer(target []rune) tokenizer {
@@ -41,9 +40,20 @@ func (t *tokenizer) Scan() (scannedToken Token) {
 			}
 			break
 		}
+		if isNumeric(t.GetRune()) {
+			// TODO: maybe refactor to its own function later
+			builder := strings.Builder{}
+			for isNumeric(t.GetRune()) {
+				builder.WriteRune(t.GetRune())
+				t.NextChar()
+			}
+			scannedToken = Token{Type: INTLIT, Literal: TokenLiteral(builder.String())}
+			break
+		}
 
 		if isSpecial(t.GetRune()) {
 			// possibility:
+			// literals
 			// operator
 			// variable
 			scannedToken, err = t.processTokenWithSpecialStart()
@@ -63,7 +73,7 @@ func (t *tokenizer) Scan() (scannedToken Token) {
 			Literal: TokenLiteral(";"),
 		}
 	}
-	t.lastTokenV2 = scannedToken
+	t.lastToken = scannedToken
 	return
 }
 
@@ -76,15 +86,9 @@ func (t *tokenizer) peekRune() rune {
 }
 
 func (t *tokenizer) Next() bool {
-	return t.lastTokenV2.Type != SEMI
+	return t.lastToken.Type != SEMI
 }
 
 func (t *tokenizer) canContinue() bool {
 	return t.currentIdx < len(t.target)
-}
-
-func (t *tokenizer) ignoreWhitespace() {
-	for t.canContinue() && isWhiteSpace(t.GetRune()) {
-		t.NextChar()
-	}
 }

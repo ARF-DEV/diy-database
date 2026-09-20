@@ -67,7 +67,7 @@ func (t *tokenizer) processTokenWithAlphabetStart() (Token, error) {
 	for t.canContinue() && !isWhiteSpace(t.GetRune()) {
 		if i == 0 {
 			if !isAlphabetic(t.GetRune()) {
-				// first character need to be alphabetic
+				// first character need to be an alphabet
 				return Token{}, ErrInvalidToken
 			}
 
@@ -90,7 +90,7 @@ func (t *tokenizer) processTokenWithAlphabetStart() (Token, error) {
 	result.Type = IDENT
 	result.Literal = TokenLiteral(builder.String())
 
-	tokenType, isKeyword := keywordMap[string(result.Literal)]
+	tokenType, isKeyword := findKeyword(result.Literal.String())
 	if isKeyword {
 		result.Type = tokenType
 	}
@@ -109,7 +109,31 @@ func (t *tokenizer) processTokenWithSpecialStart() (Token, error) {
 		builder.WriteRune(t.GetRune())
 		t.NextChar()
 		return Token{SEMI, TokenLiteral(builder.String())}, nil
+	case '(':
+		builder.WriteRune(t.GetRune())
+		t.NextChar()
+		return Token{LP, TokenLiteral(builder.String())}, nil
+	case ')':
+		builder.WriteRune(t.GetRune())
+		t.NextChar()
+		return Token{RP, TokenLiteral(builder.String())}, nil
+	case ',':
+		builder.WriteRune(t.GetRune())
+		t.NextChar()
+		return Token{COMMA, TokenLiteral(builder.String())}, nil
 		// TODO: other operator token
+	// string literal process
+	case '\'':
+		// TODO: maybe refactor to its own function later
+		builder.WriteRune(t.GetRune())
+		t.NextChar()
+		for t.GetRune() != '\'' {
+			builder.WriteRune(t.GetRune())
+			t.NextChar()
+		}
+		builder.WriteRune(t.GetRune())
+		t.NextChar()
+		return Token{STRLIT, TokenLiteral(builder.String())}, nil
 	}
 	return Token{}, ErrInvalidToken
 }

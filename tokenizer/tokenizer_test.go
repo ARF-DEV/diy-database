@@ -142,4 +142,116 @@ func TestTokenizer(t *testing.T) {
 
 		assert.EqualValues(t, expected, tokens, "expected: %v, but got: %v", expected, tokens)
 	})
+
+	t.Run("tokenizer sucessfully process a simple insert query", func(t *testing.T) {
+		input := []rune("INSERT INTO description VALUES ('hallo', 1)")
+		tokenizer := NewTokenizer(input)
+
+		expected := []Token{
+			{
+				Type:    INSERT,
+				Literal: TokenLiteral("INSERT"),
+			},
+			{
+				Type:    INTO,
+				Literal: TokenLiteral("INTO"),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("description"),
+			},
+			{
+				Type:    VALUES,
+				Literal: TokenLiteral("VALUES"),
+			},
+			{
+				Type:    LP,
+				Literal: TokenLiteral("("),
+			},
+			{
+				Type:    STRLIT,
+				Literal: TokenLiteral("'hallo'"),
+			},
+			{
+				Type:    COMMA,
+				Literal: TokenLiteral(","),
+			},
+			{
+				Type:    INTLIT,
+				Literal: TokenLiteral("1"),
+			},
+			{
+				Type:    RP,
+				Literal: TokenLiteral(")"),
+			},
+			{
+				Type:    SEMI,
+				Literal: TokenLiteral(";"),
+			},
+		}
+		tokens := []Token{}
+
+		for tokenizer.Next() {
+			token := tokenizer.Scan()
+			tokens = append(tokens, token)
+		}
+
+		assert.EqualValues(t, expected, tokens, "expected: %v, but got: %v", expected, tokens)
+	})
+
+	t.Run("tokenizer sucessfully process a simple insert query all lowercase", func(t *testing.T) {
+		input := []rune("insert into description values ('hallo', 1)")
+		tokenizer := NewTokenizer(input)
+
+		expected := []Token{
+			{
+				Type:    INSERT,
+				Literal: TokenLiteral("insert"),
+			},
+			{
+				Type:    INTO,
+				Literal: TokenLiteral("into"),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("description"),
+			},
+			{
+				Type:    VALUES,
+				Literal: TokenLiteral("values"),
+			},
+			{
+				Type:    LP,
+				Literal: TokenLiteral("("),
+			},
+			{
+				Type:    STRLIT,
+				Literal: TokenLiteral("'hallo'"),
+			},
+			{
+				Type:    COMMA,
+				Literal: TokenLiteral(","),
+			},
+			{
+				Type:    INTLIT,
+				Literal: TokenLiteral("1"),
+			},
+			{
+				Type:    RP,
+				Literal: TokenLiteral(")"),
+			},
+			{
+				Type:    SEMI,
+				Literal: TokenLiteral(";"),
+			},
+		}
+		tokens := []Token{}
+
+		for tokenizer.Next() {
+			token := tokenizer.Scan()
+			tokens = append(tokens, token)
+		}
+
+		assert.EqualValues(t, expected, tokens, "expected: %v, but got: %v", expected, tokens)
+	})
 }
