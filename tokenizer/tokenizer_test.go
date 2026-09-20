@@ -37,8 +37,8 @@ func TestTokenizer(t *testing.T) {
 		}
 		tokens := []Token{}
 
-		for tokenizer.NextV2() {
-			token := tokenizer.ScanV2()
+		for tokenizer.Next() {
+			token := tokenizer.Scan()
 			tokens = append(tokens, token)
 		}
 
@@ -63,8 +63,8 @@ func TestTokenizer(t *testing.T) {
 		}
 		tokens := []Token{}
 
-		for tokenizer.NextV2() {
-			token := tokenizer.ScanV2()
+		for tokenizer.Next() {
+			token := tokenizer.Scan()
 			tokens = append(tokens, token)
 		}
 
@@ -99,8 +99,8 @@ func TestTokenizer(t *testing.T) {
 		}
 		tokens := []Token{}
 
-		for tokenizer.NextV2() {
-			token := tokenizer.ScanV2()
+		for tokenizer.Next() {
+			token := tokenizer.Scan()
 			tokens = append(tokens, token)
 		}
 
@@ -111,8 +111,29 @@ func TestTokenizer(t *testing.T) {
 		input := []rune("SELECT * FROM users;")
 		tokenizer := NewTokenizer(input)
 
-		expected := []TokenLiteral{[]rune("SELECT"), []rune("*"), []rune("FROM"), []rune("users"), []rune(";")}
-		tokens := []TokenLiteral{}
+		expected := []Token{
+			{
+				Type:    SELECT,
+				Literal: TokenLiteral("SELECT"),
+			},
+			{
+				Type:    STAR,
+				Literal: TokenLiteral("*"),
+			},
+			{
+				Type:    FROM,
+				Literal: TokenLiteral("FROM"),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("users"),
+			},
+			{
+				Type:    SEMI,
+				Literal: TokenLiteral(";"),
+			},
+		}
+		tokens := []Token{}
 
 		for tokenizer.Next() {
 			token := tokenizer.Scan()
