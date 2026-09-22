@@ -121,6 +121,10 @@ func (t *tokenizer) processTokenWithSpecialStart() (Token, error) {
 		builder.WriteRune(t.GetRune())
 		t.NextChar()
 		return Token{COMMA, TokenLiteral(builder.String())}, nil
+	case '=':
+		builder.WriteRune(t.GetRune())
+		t.NextChar()
+		return Token{EQ, TokenLiteral(builder.String())}, nil
 		// TODO: other operator token
 	// string literal process
 	case '\'':

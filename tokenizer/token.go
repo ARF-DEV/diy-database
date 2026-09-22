@@ -30,6 +30,9 @@ const (
 	INSERT TokenType = "KEYWORD_INSERT"
 	INTO   TokenType = "KEYWORD_INTO"
 	VALUES TokenType = "KEYWORD_VALUES"
+	UPDATE TokenType = "KEYWORD_UPDATE"
+	SET    TokenType = "KEYWORD_SET"
+	WHERE  TokenType = "KEYWORD_WHERE"
 
 	// Operators
 	STAR  TokenType = "OPERATOR_STAR"         // "*"
@@ -37,6 +40,7 @@ const (
 	LP    TokenType = "OPERATOR_LEFT_PARENT"  // "("
 	RP    TokenType = "OPERATOR_RIGHT_PARENT" // ")"
 	COMMA TokenType = "OPERATOR_COMMA"        // ","
+	EQ    TokenType = "OPERATOR_EQUAL"
 
 	// Literals
 	STRLIT TokenType = "LITERAL_STR"
@@ -50,6 +54,9 @@ var keywordMap map[string]TokenType = map[string]TokenType{
 	"INSERT": INSERT,
 	"VALUES": VALUES,
 	"INTO":   INTO,
+	"UPDATE": UPDATE,
+	"SET":    SET,
+	"WHERE":  WHERE,
 }
 
 func findKeyword(str string) (TokenType, bool) {

@@ -43,7 +43,7 @@ func (t *tokenizer) Scan() (scannedToken Token) {
 		if isNumeric(t.GetRune()) {
 			// TODO: maybe refactor to its own function later
 			builder := strings.Builder{}
-			for isNumeric(t.GetRune()) {
+			for t.canContinue() && isNumeric(t.GetRune()) {
 				builder.WriteRune(t.GetRune())
 				t.NextChar()
 			}

@@ -17,7 +17,6 @@ func TestTokenizer(t *testing.T) {
 
 		assert.Equal(t, "hello world", processedString)
 	})
-	//
 	t.Run("whitespace token only acts as seperator between tokens", func(t *testing.T) {
 		tokenizer := NewTokenizer([]rune("Hello world"))
 
@@ -239,6 +238,82 @@ func TestTokenizer(t *testing.T) {
 			{
 				Type:    RP,
 				Literal: TokenLiteral(")"),
+			},
+			{
+				Type:    SEMI,
+				Literal: TokenLiteral(";"),
+			},
+		}
+		tokens := []Token{}
+
+		for tokenizer.Next() {
+			token := tokenizer.Scan()
+			tokens = append(tokens, token)
+		}
+
+		assert.EqualValues(t, expected, tokens, "expected: %v, but got: %v", expected, tokens)
+	})
+
+	t.Run("tokenizer sucessfully process a simple update query", func(t *testing.T) {
+		input := []rune("UPDATE users SET name = 'prabs', age = 12 WHERE id = 3")
+		tokenizer := NewTokenizer(input)
+
+		expected := []Token{
+			{
+				Type:    UPDATE,
+				Literal: TokenLiteral("UPDATE"),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("users"),
+			},
+			{
+				Type:    SET,
+				Literal: TokenLiteral("SET"),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("name"),
+			},
+			{
+				Type:    EQ,
+				Literal: TokenLiteral("="),
+			},
+			{
+				Type:    STRLIT,
+				Literal: TokenLiteral("'prabs'"),
+			},
+			{
+				Type:    COMMA,
+				Literal: TokenLiteral(","),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("age"),
+			},
+			{
+				Type:    EQ,
+				Literal: TokenLiteral("="),
+			},
+			{
+				Type:    INTLIT,
+				Literal: TokenLiteral("12"),
+			},
+			{
+				Type:    WHERE,
+				Literal: TokenLiteral("WHERE"),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("id"),
+			},
+			{
+				Type:    EQ,
+				Literal: TokenLiteral("="),
+			},
+			{
+				Type:    INTLIT,
+				Literal: TokenLiteral("3"),
 			},
 			{
 				Type:    SEMI,
