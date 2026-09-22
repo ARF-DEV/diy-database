@@ -329,4 +329,51 @@ func TestTokenizer(t *testing.T) {
 
 		assert.EqualValues(t, expected, tokens, "expected: %v, but got: %v", expected, tokens)
 	})
+	t.Run("tokenizer sucessfully process a simple delete query", func(t *testing.T) {
+		input := []rune("DELETE FROM users where id = 10")
+		tokenizer := NewTokenizer(input)
+
+		expected := []Token{
+			{
+				Type:    DELETE,
+				Literal: TokenLiteral("DELETE"),
+			},
+			{
+				Type:    FROM,
+				Literal: TokenLiteral("FROM"),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("users"),
+			},
+			{
+				Type:    WHERE,
+				Literal: TokenLiteral("where"),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("id"),
+			},
+			{
+				Type:    EQ,
+				Literal: TokenLiteral("="),
+			},
+			{
+				Type:    INTLIT,
+				Literal: TokenLiteral("10"),
+			},
+			{
+				Type:    SEMI,
+				Literal: TokenLiteral(";"),
+			},
+		}
+		tokens := []Token{}
+
+		for tokenizer.Next() {
+			token := tokenizer.Scan()
+			tokens = append(tokens, token)
+		}
+
+		assert.EqualValues(t, expected, tokens, "expected: %v, but got: %v", expected, tokens)
+	})
 }

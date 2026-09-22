@@ -33,6 +33,7 @@ const (
 	UPDATE TokenType = "KEYWORD_UPDATE"
 	SET    TokenType = "KEYWORD_SET"
 	WHERE  TokenType = "KEYWORD_WHERE"
+	DELETE TokenType = "KEYWORD_DELETE"
 
 	// Operators
 	STAR  TokenType = "OPERATOR_STAR"         // "*"
@@ -57,6 +58,7 @@ var keywordMap map[string]TokenType = map[string]TokenType{
 	"UPDATE": UPDATE,
 	"SET":    SET,
 	"WHERE":  WHERE,
+	"DELETE": DELETE,
 }
 
 func findKeyword(str string) (TokenType, bool) {
