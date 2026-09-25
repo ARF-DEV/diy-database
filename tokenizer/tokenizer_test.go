@@ -376,4 +376,71 @@ func TestTokenizer(t *testing.T) {
 
 		assert.EqualValues(t, expected, tokens, "expected: %v, but got: %v", expected, tokens)
 	})
+	t.Run("tokenizer sucessfully process a simple create table query", func(t *testing.T) {
+		input := []rune("CREATE TABLE users (id INTEGER PRIMARY KEY, name STRING)")
+		tokenizer := NewTokenizer(input)
+
+		expected := []Token{
+			{
+				Type:    CREATE,
+				Literal: TokenLiteral("CREATE"),
+			},
+			{
+				Type:    TABLE,
+				Literal: TokenLiteral("TABLE"),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("users"),
+			},
+			{
+				Type:    LP,
+				Literal: TokenLiteral("("),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("id"),
+			},
+			{
+				Type:    INTEGERTYPE,
+				Literal: TokenLiteral("INTEGER"),
+			},
+			{
+				Type:    PRIMARY,
+				Literal: TokenLiteral("PRIMARY"),
+			},
+			{
+				Type:    KEY,
+				Literal: TokenLiteral("KEY"),
+			},
+			{
+				Type:    COMMA,
+				Literal: TokenLiteral(","),
+			},
+			{
+				Type:    IDENT,
+				Literal: TokenLiteral("name"),
+			},
+			{
+				Type:    STRINGTYPE,
+				Literal: TokenLiteral("STRING"),
+			},
+			{
+				Type:    RP,
+				Literal: TokenLiteral(")"),
+			},
+			{
+				Type:    SEMI,
+				Literal: TokenLiteral(";"),
+			},
+		}
+		tokens := []Token{}
+
+		for tokenizer.Next() {
+			token := tokenizer.Scan()
+			tokens = append(tokens, token)
+		}
+
+		assert.EqualValues(t, expected, tokens, "expected: %v, but got: %v", expected, tokens)
+	})
 }
