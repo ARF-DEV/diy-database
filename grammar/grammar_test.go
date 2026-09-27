@@ -18,7 +18,8 @@ func TestGenerateLRItems(t *testing.T) {
 			ProdictionIdx: 0,
 			DotPosition:   0,
 		}
-		lrItems := generateLRItems(productions)
+		generator := NewGenerator(productions)
+		lrItems := generator.generateLRItems()
 
 		assert.Len(t, lrItems, 1)
 		assert.Equal(t, expectedFirstItem, lrItems[0])
@@ -43,7 +44,72 @@ func TestGenerateLRItems(t *testing.T) {
 			{1, 1},
 			{1, 2},
 		}
-		lrItems := generateLRItems(productions)
+		generator := NewGenerator(productions)
+		lrItems := generator.generateLRItems()
+
+		assert.Len(t, lrItems, len(expected))
+		assert.Equal(t, expected, lrItems)
+	})
+
+	t.Run("valid production with nested non-terminal rules", func(t *testing.T) {
+		productions := []Production{
+			{
+				Statement,
+				[]Symbol{
+					StatementSelect,
+				},
+			},
+			{
+				StatementSelect,
+				[]Symbol{
+					KeywordSelect,
+					Identifier,
+				},
+			},
+		}
+		expected := []LRItem{
+			{0, 0},
+			{0, 1},
+			{1, 0},
+			{1, 1},
+			{1, 2},
+		}
+		generator := NewGenerator(productions)
+		lrItems := generator.generateLRItems()
+
+		assert.Len(t, lrItems, len(expected))
+		assert.Equal(t, expected, lrItems)
+	})
+
+	t.Run("valid LR states for simple SELECT query", func(t *testing.T) {
+		productions := []Production{
+			{
+				Statement,
+				[]Symbol{
+					StatementSelect,
+				},
+			},
+			{
+				StatementSelect,
+				[]Symbol{
+					KeywordSelect,
+					Identifier,
+					KeywordFrom,
+					OperatorSemi,
+				},
+			},
+		}
+		expected := []LRItem{
+			{0, 0},
+			{0, 1},
+			{1, 0},
+			{1, 1},
+			{1, 2},
+			{1, 3},
+			{1, 4},
+		}
+		generator := NewGenerator(productions)
+		lrItems := generator.generateLRItems()
 
 		assert.Len(t, lrItems, len(expected))
 		assert.Equal(t, expected, lrItems)
