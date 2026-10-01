@@ -7,111 +7,108 @@ import (
 )
 
 func TestGenerateLRItems(t *testing.T) {
-	t.Run("empty production should return 1 LR item (with dot position = 0)", func(t *testing.T) {
-		productions := []Production{
-			{
-				Empty,
-				[]Symbol{},
-			},
-		}
-		expectedFirstItem := LRItem{
-			ProdictionIdx: 0,
-			DotPosition:   0,
-		}
-		generator := NewGenerator(productions)
-		lrItems := generator.generateLRItems()
-
-		assert.Len(t, lrItems, 1)
-		assert.Equal(t, expectedFirstItem, lrItems[0])
-	})
-	t.Run("return 4 lr items on SELECT IDENT and empty production", func(t *testing.T) {
-		productions := []Production{
-			{
-				Empty,
-				[]Symbol{},
-			},
-			{
-				StatementSelect,
-				[]Symbol{
-					KeywordSelect,
-					Identifier,
+	cases := []struct {
+		name     string
+		expected []LRItem
+		input    []Production
+	}{
+		{
+			name: "empty production should return 1 LR item (with dot position = 0)",
+			expected: []LRItem{
+				{
+					ProdictionIdx: 0,
+					DotPosition:   0,
 				},
 			},
-		}
-		expected := []LRItem{
-			{0, 0},
-			{1, 0},
-			{1, 1},
-			{1, 2},
-		}
-		generator := NewGenerator(productions)
-		lrItems := generator.generateLRItems()
-
-		assert.Len(t, lrItems, len(expected))
-		assert.Equal(t, expected, lrItems)
-	})
-
-	t.Run("valid production with nested non-terminal rules", func(t *testing.T) {
-		productions := []Production{
-			{
-				Statement,
-				[]Symbol{
+			input: []Production{
+				{
+					Empty,
+					[]Symbol{},
+				},
+			},
+		},
+		{
+			name: "return 4 lr items on SELECT IDENT and empty production",
+			expected: []LRItem{
+				{0, 0},
+				{1, 0},
+				{1, 1},
+				{1, 2},
+			},
+			input: []Production{
+				{
+					Empty,
+					[]Symbol{},
+				},
+				{
 					StatementSelect,
+					[]Symbol{
+						KeywordSelect,
+						Identifier,
+					},
 				},
 			},
-			{
-				StatementSelect,
-				[]Symbol{
-					KeywordSelect,
-					Identifier,
-				},
+		},
+		{
+			name: "valid production with nested non-terminal rules",
+			expected: []LRItem{
+				{0, 0},
+				{0, 1},
+				{1, 0},
+				{1, 1},
+				{1, 2},
 			},
-		}
-		expected := []LRItem{
-			{0, 0},
-			{0, 1},
-			{1, 0},
-			{1, 1},
-			{1, 2},
-		}
-		generator := NewGenerator(productions)
-		lrItems := generator.generateLRItems()
-
-		assert.Len(t, lrItems, len(expected))
-		assert.Equal(t, expected, lrItems)
-	})
-
-	t.Run("valid LR states for simple SELECT query", func(t *testing.T) {
-		productions := []Production{
-			{
-				Statement,
-				[]Symbol{
+			input: []Production{
+				{
+					Statement,
+					[]Symbol{
+						StatementSelect,
+					},
+				},
+				{
 					StatementSelect,
+					[]Symbol{
+						KeywordSelect,
+						Identifier,
+					},
 				},
 			},
-			{
-				StatementSelect,
-				[]Symbol{
-					KeywordSelect,
-					Identifier,
-					KeywordFrom,
-					OperatorSemi,
+		},
+		{
+			name: "valid LR states for simple SELECT query",
+			expected: []LRItem{
+				{0, 0},
+				{0, 1},
+				{1, 0},
+				{1, 1},
+				{1, 2},
+				{1, 3},
+				{1, 4},
+			},
+			input: []Production{
+				{
+					Statement,
+					[]Symbol{
+						StatementSelect,
+					},
+				},
+				{
+					StatementSelect,
+					[]Symbol{
+						KeywordSelect,
+						Identifier,
+						KeywordFrom,
+						OperatorSemi,
+					},
 				},
 			},
-		}
-		expected := []LRItem{
-			{0, 0},
-			{0, 1},
-			{1, 0},
-			{1, 1},
-			{1, 2},
-			{1, 3},
-			{1, 4},
-		}
-		generator := NewGenerator(productions)
-		lrItems := generator.generateLRItems()
+		},
+	}
 
-		assert.Len(t, lrItems, len(expected))
-		assert.Equal(t, expected, lrItems)
-	})
+	for _, tc := range cases {
+		g := NewGenerator(tc.input)
+		lrItems := g.generateLRItems()
+		assert.Len(t, lrItems, len(tc.expected))
+		assert.Equal(t, tc.expected, lrItems)
+	}
 }
