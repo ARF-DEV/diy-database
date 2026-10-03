@@ -4,13 +4,15 @@ package grammar
 type (
 	Symbol     int
 	Production struct {
-		Name  Symbol
-		Parts []Symbol
+		Symbol Symbol
+		Parts  []Symbol
 	}
 	LRItem struct {
-		ProdictionIdx int
+		ProductionIdx int
 		DotPosition   int
 	}
+
+	State []LRItem
 )
 
 const (
@@ -24,18 +26,33 @@ const (
 	// non-terminal symbols
 	Statement // base statement // a start non terminal
 	StatementSelect
+
+	AugmentStart
+	IgnoreAugment
 )
 
 type generator struct {
+	startSymbol Symbol
 	productions []Production
 	visited     map[LRItem]struct{}
 }
 
-func NewGenerator(productions []Production) generator {
-	return generator{
-		productions: productions,
+func NewGenerator(productions []Production, startSymbol Symbol, ignoreSymbol bool) generator {
+	g := generator{
+		startSymbol: startSymbol,
 		visited:     map[LRItem]struct{}{},
 	}
+	if ignoreSymbol {
+		g.productions = productions
+	} else {
+		p := make([]Production, len(productions)+1)
+		p[0] = g.augment()
+		for i := 1; i < len(p); i++ {
+			p[i] = productions[i-1]
+		}
+		g.productions = p
+	}
+	return g
 }
 
 func (g *generator) generateLRItems() []LRItem {
@@ -65,9 +82,9 @@ func (g *generator) lrItemsFromProduction(idx int) []LRItem {
 
 		g.visited[item] = struct{}{}
 		lrItems = append(lrItems, item)
-		production := g.productions[item.ProdictionIdx]
+		production := g.productions[item.ProductionIdx]
 		if len(production.Parts) > item.DotPosition {
-			queue = append(queue, LRItem{item.ProdictionIdx, item.DotPosition + 1})
+			queue = append(queue, LRItem{item.ProductionIdx, item.DotPosition + 1})
 		}
 		// do closure operation if non terminal
 		if len(production.Parts) > 0 && item.DotPosition < len(production.Parts) {
@@ -84,7 +101,7 @@ func (g *generator) lrItemsFromProduction(idx int) []LRItem {
 func (g *generator) closure(symbol Symbol) []LRItem {
 	lrItems := []LRItem{}
 	for idx, p := range g.productions {
-		if p.Name == symbol {
+		if p.Symbol == symbol {
 			lrItems = append(lrItems, LRItem{idx, 0})
 		}
 	}
@@ -98,4 +115,54 @@ func isNonTerminal(symbol Symbol) bool {
 	}
 	_, found := nonTerminalMap[symbol]
 	return found
+}
+
+func (g *generator) GenerateStates() []State {
+	queue := g.closure(AugmentStart)
+	states := []State{}
+	for len(queue) > 0 {
+		item := queue[0]
+		queue = queue[1:]
+		// all state start with one start LR item
+		state := g.getState([]LRItem{item})
+		states = append(states, state)
+		// handle transition
+		for _, s := range state {
+			production := g.productions[s.ProductionIdx]
+			if s.DotPosition < len(production.Parts) {
+				sCopy := s
+				// transition
+				sCopy.DotPosition++
+				queue = append(queue, sCopy)
+			}
+		}
+	}
+	return states
+}
+
+func (g *generator) getState(queue []LRItem) []LRItem {
+	finalState := []LRItem{}
+	for len(queue) > 0 {
+		item := queue[0]
+		queue = queue[1:]
+		production := g.productions[item.ProductionIdx]
+		if item.DotPosition < len(production.Parts) {
+			nextSymbol := production.Parts[item.DotPosition]
+			if isNonTerminal(nextSymbol) {
+				queue = append(queue, g.closure(nextSymbol)...)
+			}
+		}
+		finalState = append(finalState, item)
+	}
+
+	return finalState
+}
+
+func (g *generator) augment() Production {
+	return Production{
+		Symbol: AugmentStart,
+		Parts: []Symbol{
+			g.startSymbol,
+		},
+	}
 }
