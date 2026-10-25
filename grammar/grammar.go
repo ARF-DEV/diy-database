@@ -22,13 +22,14 @@ const (
 	KeywordFrom
 	Identifier
 	OperatorSemi
+	OperatorComma
 
 	// non-terminal symbols
 	Statement // base statement // a start non terminal
 	StatementSelect
+	SelectList
 
 	AugmentStart
-	IgnoreAugment
 )
 
 type generator struct {
@@ -112,6 +113,7 @@ func isNonTerminal(symbol Symbol) bool {
 	nonTerminalMap := map[Symbol]struct{}{
 		StatementSelect: {},
 		Statement:       {},
+		SelectList:      {},
 	}
 	_, found := nonTerminalMap[symbol]
 	return found
@@ -123,9 +125,11 @@ func (g *generator) GenerateStates() []State {
 	for len(queue) > 0 {
 		item := queue[0]
 		queue = queue[1:]
+
 		// all state start with one start LR item
 		state := g.getState([]LRItem{item})
 		states = append(states, state)
+		g.visited[item] = struct{}{}
 		// handle transition
 		for _, s := range state {
 			production := g.productions[s.ProductionIdx]
@@ -145,6 +149,13 @@ func (g *generator) getState(queue []LRItem) []LRItem {
 	for len(queue) > 0 {
 		item := queue[0]
 		queue = queue[1:]
+		if _, visited := g.visited[item]; visited {
+			continue
+		}
+		if g.visited == nil {
+			g.visited = map[LRItem]struct{}{}
+		}
+		g.visited[item] = struct{}{}
 		production := g.productions[item.ProductionIdx]
 		if item.DotPosition < len(production.Parts) {
 			nextSymbol := production.Parts[item.DotPosition]

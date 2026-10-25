@@ -11,7 +11,7 @@ func (g *generator) StatesToString(item State) string {
 		s := ""
 		s += fmt.Sprintf("%v\n", lr)
 		s += fmt.Sprintf("%v\n", g.productions[lr.ProductionIdx])
-		r += s + "\n"
+		r += s
 	}
 	return r
 }
@@ -32,7 +32,9 @@ var symbolToStr = map[Symbol]string{
 	KeywordSelect:   "Keyword_Select",
 	KeywordFrom:     "Keyword_From",
 	Identifier:      "Ident",
+	SelectList:      "Select_List",
 	OperatorSemi:    "Semi",
+	OperatorComma:   "Comma",
 	Statement:       "Statement",
 	StatementSelect: "Statement_Select",
 	AugmentStart:    "test",

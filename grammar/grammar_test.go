@@ -127,10 +127,18 @@ func TestGenerateState(t *testing.T) {
 				StatementSelect,
 				[]Symbol{
 					KeywordSelect,
-					Identifier,
+					SelectList,
 					KeywordFrom,
 					Identifier,
 					OperatorSemi,
+				},
+			},
+			{
+				Symbol: SelectList,
+				Parts: []Symbol{
+					SelectList,
+					OperatorComma,
+					Identifier,
 				},
 			},
 		}
@@ -165,6 +173,7 @@ func TestGenerateState(t *testing.T) {
 
 		g := NewGenerator(input, Statement, false)
 		states := g.GenerateStates()
+		printState(&g, states)
 		assert.Equal(t, expected, states)
 	})
 }
