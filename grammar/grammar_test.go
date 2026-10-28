@@ -31,10 +31,10 @@ func TestGenerateLRItems(t *testing.T) {
 		{
 			name: "return 4 lr items on SELECT IDENT and empty production",
 			expected: []LRItem{
-				{0, 0},
-				{1, 0},
-				{1, 1},
-				{1, 2},
+				{ProductionIdx: 0, DotPosition: 0},
+				{ProductionIdx: 1, DotPosition: 0},
+				{ProductionIdx: 1, DotPosition: 1},
+				{ProductionIdx: 1, DotPosition: 2},
 			},
 			input: []Production{
 				{
@@ -53,11 +53,11 @@ func TestGenerateLRItems(t *testing.T) {
 		{
 			name: "valid production with nested non-terminal rules",
 			expected: []LRItem{
-				{0, 0},
-				{0, 1},
-				{1, 0},
-				{1, 1},
-				{1, 2},
+				{ProductionIdx: 0, DotPosition: 0},
+				{ProductionIdx: 0, DotPosition: 1},
+				{ProductionIdx: 1, DotPosition: 0},
+				{ProductionIdx: 1, DotPosition: 1},
+				{ProductionIdx: 1, DotPosition: 2},
 			},
 			input: []Production{
 				{
@@ -78,13 +78,13 @@ func TestGenerateLRItems(t *testing.T) {
 		{
 			name: "valid LR states for simple SELECT query",
 			expected: []LRItem{
-				{0, 0},
-				{0, 1},
-				{1, 0},
-				{1, 1},
-				{1, 2},
-				{1, 3},
-				{1, 4},
+				{ProductionIdx: 0, DotPosition: 0},
+				{ProductionIdx: 0, DotPosition: 1},
+				{ProductionIdx: 1, DotPosition: 0},
+				{ProductionIdx: 1, DotPosition: 1},
+				{ProductionIdx: 1, DotPosition: 2},
+				{ProductionIdx: 1, DotPosition: 3},
+				{ProductionIdx: 1, DotPosition: 4},
 			},
 			input: []Production{
 				{
@@ -144,30 +144,40 @@ func TestGenerateState(t *testing.T) {
 		}
 		expected := []State{
 			{
-				{0, 0}, // test -> * statement
-				{1, 0}, // statement -> * select_stmt
-				{2, 0}, // select_stmt -> select_key ident from ident semi
+				{ProductionIdx: 0, DotPosition: 0}, // augment -> * statement
+				{ProductionIdx: 1, DotPosition: 0}, // statement -> * select_stmt
+				{ProductionIdx: 2, DotPosition: 0}, // select_stmt -> * select_key ident from ident semi
 			},
 			{
-				{0, 1}, // test -> statement *
+				{ProductionIdx: 2, DotPosition: 1, parentStateIdx: 0}, // select_stmt -> select_key * select_list from ident semi
+				{ProductionIdx: 3, DotPosition: 0, parentStateIdx: 0}, // select_list -> * select_list op_comma ident
 			},
 			{
-				{1, 1}, // statement -> select_stmt *
+				{ProductionIdx: 3, DotPosition: 1, parentStateIdx: 1}, // select_list -> select_list * op_comma ident
 			},
 			{
-				{2, 1}, // select_stmt -> select_key * ident from ident semi
+				{ProductionIdx: 3, DotPosition: 2, parentStateIdx: 2}, // select_list -> select_list op_comma * ident
 			},
 			{
-				{2, 2}, // select_stmt -> select_key ident * from ident semi
+				{ProductionIdx: 3, DotPosition: 3, parentStateIdx: 3}, // select_list -> select_list op_comma ident *
 			},
 			{
-				{2, 3}, // select_stmt -> select_key ident from * ident semi
+				{ProductionIdx: 2, DotPosition: 2, parentStateIdx: 1}, // select_stmt -> select_key select_list * from ident semi
 			},
 			{
-				{2, 4}, // select_stmt -> select_key ident from ident * semi
+				{ProductionIdx: 2, DotPosition: 3, parentStateIdx: 5}, // select_stmt -> select_key select_list from * ident semi
 			},
 			{
-				{2, 5}, // select_stmt -> select_key ident from ident semi *
+				{ProductionIdx: 2, DotPosition: 4, parentStateIdx: 6}, // select_stmt -> select_key select_list from ident * semi
+			},
+			{
+				{ProductionIdx: 2, DotPosition: 5, parentStateIdx: 7}, // select_stmt -> select_key select_list from ident semi *
+			},
+			{
+				{ProductionIdx: 1, DotPosition: 1, parentStateIdx: 0}, // statement -> select_stmt *
+			},
+			{
+				{ProductionIdx: 0, DotPosition: 1, parentStateIdx: 0}, // augment -> statement *
 			},
 		}
 
